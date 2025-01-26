@@ -28,6 +28,8 @@ def get_coordinates_nominatim(address):
     else:
         raise Exception(f"Erro na requisição: {response.status_code}")
 
-endereco = "São Paulo, Brasil"
-latitude, longitude = get_coordinates_nominatim(endereco)
-print(latitude, longitude)
+# Exemplo de entrada:
+# "Brasil, São Paulo, São Paulo, Miguel Yunes"
+
+# Exemplo de saída:
+# -23.5507, -46.6875
