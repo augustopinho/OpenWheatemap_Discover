@@ -1,14 +1,11 @@
-# Import Bibliotecas
-from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType, FloatType, IntegerType
-
 # Import Módolos
 import location_nominatim
 import extract_weather_now
 import transformation
 
-# Open Weathermap API key
-api_key = "d200182684adb0b606788a22747cffd6"
+# Definindo variaveis
+api_key_open_weathermap = "d200182684adb0b606788a22747cffd6"
+email_nominatim = "augustopinho@outlook.com"
 
 
 
@@ -20,32 +17,23 @@ api_key = "d200182684adb0b606788a22747cffd6"
 
 # # Colocando em só uma string as variaveis acima.
 # string_input = f"{country}, {state}, {city}, {address}"
-string_input = "Brasil, São Paulo, São Paulo, Miguel Yunes"
+
+string_input = "Brasil, São Paulo, Maua, Rua Ozerias Rodrigues de Oliveira"
 
 # Capturando lat e lon, atraves do endereço.
-lat, lon = location_nominatim.get_coordinates_nominatim(string_input)
+lat, lon = location_nominatim.get_coordinates_nominatim(string_input, email_nominatim)
 
 # Extraindo clima agora.
-weather_now_data = extract_weather_now.get_weather_now(lat, lon, api_key)
+weather_now_data = extract_weather_now.get_weather_now(lat, lon, api_key_open_weathermap)
+
+# Achatando, transformando e printando os dados extraidos
+df = transformation.start_session_spark_and_transformations(weather_now_data)
 
 
-
-# Iniciar a sessão Spark
-# Iniciar a sessão Spark: SparkSession.builder
-# Nome da sessão Spark: appName("ProcessWeatherJSON") 
-# Garante a sessão Spark seja iniciada sem váriaveis de sessão: .getOrCreate()
-
-spark = SparkSession.builder \
-        .appName("ProcessWeatherJSON") \
-        .getOrCreate() 
-
-
-
-# Achatar o JSON
-flattened_data = transformation.flatten_json(weather_now_data)
-
-# Criar o DataFrame
-df = spark.createDataFrame([flattened_data])
-
-# Mostrar o esquema e os dados
-df.show(truncate=False, vertical=True)
+# # Configurar cliente S3
+# s3 = boto3.client(
+#     's3',
+#     endpoint_url='http://<seu-endereco>:9000',
+#     aws_access_key_id='MINIO_ROOT_USER',
+#     aws_secret_access_key='MINIO_ROOT_PASSWORD'
+# )

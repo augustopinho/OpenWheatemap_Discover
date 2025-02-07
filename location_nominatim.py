@@ -1,6 +1,6 @@
 import requests
 
-def get_coordinates_nominatim(address):
+def get_coordinates_nominatim(address, email):
     url = "https://nominatim.openstreetmap.org/search"
     params = {
         "q": address,  
@@ -9,7 +9,7 @@ def get_coordinates_nominatim(address):
     }
 
     headers = {
-        "User-Agent": "augustopinho@outlook.com"  
+        "User-Agent": email 
     }
 
     response = requests.get(url, params=params, headers=headers)
