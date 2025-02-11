@@ -1,6 +1,8 @@
 import requests
 
 def get_coordinates_nominatim(address, email):
+    '''Pegando a Latitude e Longitude baseada no endereço (input) por meio da API openstreetmap.'''
+
     url = "https://nominatim.openstreetmap.org/search"
     params = {
         "q": address,  

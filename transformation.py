@@ -1,9 +1,27 @@
 # Import Bibliotecas
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType, FloatType, IntegerType
 
-def flatten_json(data):
-    '''A função recebe como entrada um JSON com uma estrutura aninhada e retornar um json mais estruturado.'''
+def create_session_spark():
+    '''A função inicializa e configura a sessão Spark.'''
+
+    # Iniciar sessão Spark
+    print("Iniciando sessão Spark...")
+
+    try:
+        spark = SparkSession.builder \
+                .appName("my_app") \
+                .getOrCreate()
+                # .config("spark.jars", "/opt/spark/jars/postgresql-42.6.0.jar") \
+                # .getOrCreate()
+
+    except:
+        print('Erro na inicialização do Spark')
+
+    return spark
+
+
+def flatten_json_and_create_df(data, spark):
+    '''A função recebe como entrada um JSON com uma estrutura aninhada e retornar um json mais estruturado, posteriormente é feito o DataFrame.'''
 
     # Dicionário para armazenar os dados achatados
     flat_data = {
@@ -38,46 +56,24 @@ def flatten_json(data):
         "cod": data['cod']
     }
 
-    print('JSON achatado com sucesso!')
-    return flat_data
+    df = spark.createDataFrame([flat_data])
+
+    return df
 
 def alters_columns(df):
-    '''A função recebe um DataFrame e retorna um DataFrame com as colunas alteradas.'''
+    '''A função recebe um DataFrame e retorna um DataFrame com as colunas alteradas de temperatura e dropa as colunas de código e id.'''
     
     # Altera as colunas de temperatura, converte de Kelvins para Celcius, 
-    # e excluindo colunas de código, id e não tão relevantes (sys_sunrise', 'sys_sunset' , 'sys_type')
+    # e excluindo colunas de código e id
     df = df.withColumn('temp', df.temp - 273.15) \
             .withColumn('temp_min', df.temp_min - 273.15) \
             .withColumn('temp_max', df.temp_max - 273.15) \
             .withColumn('feels_like', df.feels_like - 273.15) \
-            .drop('cod', 'id', 'sys_id', 'weather_id', 'sys_sunrise', 'sys_sunset' , 'sys_type') 
+            .drop('cod', 'id', 'sys_id', 'weather_id') 
 
-    print('Colunas alteradas com sucesso!')
-    return df
-
-def start_session_spark_and_transformations(data):
-    
-    # Iniciar sessão Spark
-    print("Iniciando sessão Spark..")
-
-    # Iniciar a sessão Spark: SparkSession.builder
-    # Nome da sessão Spark: appName("ProcessWeatherJSON") 
-    # Garante a sessão Spark seja iniciada sem váriaveis de sessão: .getOrCreate()
-    spark = SparkSession.builder \
-            .appName("ProcessWeatherJSON") \
-            .getOrCreate() 
-    
-    # Achatando o JSON
-    flatten_json_data = flatten_json(data)
-
-    # Criar o DataFrame a partir do JSON achatado
-    df = spark.createDataFrame([flatten_json_data])
-
-    # Alterando colunas e tirando colunas não necessarias
-    df = alters_columns(df)
+    print('Alteração de colunas efetuada com sucesso!')
 
     df.show(vertical=True, truncate=False)
 
-    print('Alteração efetuada com sucesso!')
-
     return df
+

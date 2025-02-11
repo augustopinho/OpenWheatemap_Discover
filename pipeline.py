@@ -1,15 +1,19 @@
 # Import Módolos
-import location_nominatim
+import extract_location_nominatim
 import extract_weather_now
 import transformation
+import driver_postgres
 
-# Definindo variaveis
+# Definindo variaveis (APIs e Banco de dados)
 api_key_open_weathermap = "d200182684adb0b606788a22747cffd6"
 email_nominatim = "augustopinho@outlook.com"
 
 
 
-# # Capturando informações do localização
+# INPUTS #
+
+# Inputando informações de localização
+# print("--------------------------INPUT DOS DADOS------------------------------")
 # address = input("Digite o logradouro que você está interessado: ")
 # city = input("Digite a cidade que você está interessado: ")
 # state = input("Digite o estado que você está interessado: ")
@@ -18,22 +22,34 @@ email_nominatim = "augustopinho@outlook.com"
 # # Colocando em só uma string as variaveis acima.
 # string_input = f"{country}, {state}, {city}, {address}"
 
-string_input = "Brasil, São Paulo, Maua, Rua Ozerias Rodrigues de Oliveira"
+string_input = "Brasil, São Paulo, São Paulo, Rua Miguel Yunes"
 
-# Capturando lat e lon, atraves do endereço.
-lat, lon = location_nominatim.get_coordinates_nominatim(string_input, email_nominatim)
 
-# Extraindo clima agora.
+
+# CRIAÇÃO DE TABELAS NOS SGBDs #
+
+# Verifica/Cria a tabela no postgres
+driver_postgres.create_table_psycopg2()
+
+
+
+# EXTRAÇÕES POR MEIO DAS APIs #
+
+# Capturando lat e lon, atraves do endereço
+lat, lon = extract_location_nominatim.get_coordinates_nominatim(string_input, email_nominatim)
+
+# Extraindo clima agora
 weather_now_data = extract_weather_now.get_weather_now(lat, lon, api_key_open_weathermap)
 
-# Achatando, transformando e printando os dados extraidos
-df = transformation.start_session_spark_and_transformations(weather_now_data)
 
 
-# # Configurar cliente S3
-# s3 = boto3.client(
-#     's3',
-#     endpoint_url='http://<seu-endereco>:9000',
-#     aws_access_key_id='MINIO_ROOT_USER',
-#     aws_secret_access_key='MINIO_ROOT_PASSWORD'
-# )
+# TRANSFORMAÇÕES PELO SPARK #
+
+# Criando a SparkSession
+spark = transformation.create_session_spark()
+
+# Achatando o JSON e criando o DataFrame Spark
+df = transformation.flatten_json_and_create_df(weather_now_data, spark)
+
+# Altera as colunas de temperatura e dropa as colunas de código.
+df = transformation.alters_columns(df)
