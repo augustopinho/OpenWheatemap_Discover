@@ -1,5 +1,6 @@
 # Import Bibliotecas
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, from_unixtime
 
 def create_session_spark():
     '''A função inicializa e configura a sessão Spark.'''
@@ -9,10 +10,9 @@ def create_session_spark():
 
     try:
         spark = SparkSession.builder \
-                .appName("my_app") \
-                .getOrCreate()
-                # .config("spark.jars", "/opt/spark/jars/postgresql-42.6.0.jar") \
-                # .getOrCreate()
+        .appName("TestePostgres") \
+        .config("spark.jars", "/opt/spark/jars/postgresql-42.7.5.jar") \
+        .getOrCreate()
 
     except:
         print('Erro na inicialização do Spark')
@@ -63,14 +63,18 @@ def flatten_json_and_create_df(data, spark):
 def alters_columns(df):
     '''A função recebe um DataFrame e retorna um DataFrame com as colunas alteradas de temperatura e dropa as colunas de código e id.'''
     
-    # Altera as colunas de temperatura, converte de Kelvins para Celcius, 
+    # Altera as colunas de temperatura, converte de Kelvins para Celcius,
+    # Alterando o Dtype de dt (data)
     # e excluindo colunas de código e id
     df = df.withColumn('temp', df.temp - 273.15) \
             .withColumn('temp_min', df.temp_min - 273.15) \
             .withColumn('temp_max', df.temp_max - 273.15) \
             .withColumn('feels_like', df.feels_like - 273.15) \
+            .withColumn("dt", from_unixtime(col("dt")).cast("timestamp")) \
+            .withColumn("sys_sunrise", from_unixtime(col("sys_sunrise")).cast("timestamp")) \
+            .withColumn("sys_sunset", from_unixtime(col("sys_sunset")).cast("timestamp")) \
             .drop('cod', 'id', 'sys_id', 'weather_id') 
-
+    
     print('Alteração de colunas efetuada com sucesso!')
 
     df.show(vertical=True, truncate=False)

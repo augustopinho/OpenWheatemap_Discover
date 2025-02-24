@@ -1,5 +1,6 @@
-from pyspark.sql import SparkSession
 import psycopg2
+from pyspark.sql import SparkSession
+
 
 def create_table_psycopg2():
     '''
@@ -23,21 +24,21 @@ def create_table_psycopg2():
 
         cur.execute('''
                     CREATE TABLE IF NOT EXISTS tb_stats_weather(
-                        origin VARCHAR(20)
+                        base VARCHAR(20)
                     ,   clouds_all INTEGER
                     ,   coord_lat NUMERIC(9,6)
                     ,   coord_lon NUMERIC(9,6)
-                    ,   dt_openweathermap TIMESTAMP
+                    ,   dt TIMESTAMP
                     ,   feels_like NUMERIC(22,19)
-                    ,   grnd_leve INTEGER
+                    ,   grnd_level INTEGER
                     ,   humidity INTEGER
-                    ,   location_name VARCHAR(30)
+                    ,   name VARCHAR(30)
                     ,   pressure INTEGER
                     ,   sea_level INTEGER
                     ,   sys_country VARCHAR(3)
                     ,   sys_sunrise TIMESTAMP
                     ,   sys_sunset TIMESTAMP
-                    ,   sys_origin INTEGER
+                    ,   sys_type INTEGER
                     ,   temp NUMERIC(22,19)
                     ,   temp_max NUMERIC(22,19)
                     ,   temp_min NUMERIC(22,19)
@@ -68,11 +69,23 @@ def create_table_psycopg2():
             print('...')
 
 
-# # Configurações do JBDC_URL
-# jdbc_url = "jdbc:postgresql://localhost:5432/open_weather_map"
-# table_name = "tb_open_weather_map"
-# properties = {
-#     "user": "postgres",
-#     "password": "",
-#     "driver": "org.postgresql.Driver"
-# }
+
+def write_postgres(df):
+    
+    # JDBC URL configurações
+    jdbc_url = "jdbc:postgresql://localhost:5432/open_weather_map"
+
+    # Propriedades do PostgreSQL
+    properties = {
+        "user": "postgres",
+        "password": "42pinhoAB!",
+        "driver": "org.postgresql.Driver"
+    }
+
+    # Teste a leitura de uma tabela
+    df.write.jdbc(
+        url=jdbc_url,
+        table="tb_stats_weather",
+        mode="append",
+        properties=properties
+    )
