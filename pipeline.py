@@ -27,8 +27,11 @@ string_input = "Brasil, São Paulo, São Paulo, Rua Miguel Yunes"
 
 # CRIAÇÃO DE TABELAS NOS SGBDs
 
+# Criando Classe drive_postgres para a operação do postgreSQL.
+class_postgres = driver_postgres.drive_postgres()
+
 # Verifica/Cria a tabela no postgres
-driver_postgres.create_table_psycopg2()
+class_postgres.create_table_psycopg2()
 
 
 
@@ -55,7 +58,7 @@ df = transformation.alters_columns(df)
 
 
 
-# SALVANDO NOS SGBDs
+# Persistindo NOS SGBDs
 
-# Salvando o dado no PostgreSQL
-driver_postgres.write_postgres(df)
+# Persistindo os dados no PostgreSQL
+class_postgres.write_postgres(df)
