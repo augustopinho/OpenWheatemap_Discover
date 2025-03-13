@@ -17,13 +17,13 @@ class drive_postgres:
         self.database = "open_weather_map"
         self.table = "tb_stats_weather"
 
+
+
     def create_table_psycopg2(self):
         '''
         Cria uma conexão do postgres com o psycopg2, depois verifica se a tabela 'tb_stats_weather' já está criada,
         se não, cria a tabela.
         '''
-
-        print('...')
 
         # Tentando connectar ao PostgreSQL
         try:
@@ -34,7 +34,6 @@ class drive_postgres:
                                     database=self.database 
                                     )
             
-            print("Conexão do psycopg2 efetuada com sucesso!")
 
             # Criando o curso do psycopg2
             cur = conn.cursor()
@@ -70,26 +69,24 @@ class drive_postgres:
                         );
                     ''')
             
-            print('Tabela verifica/criada com sucesso!')
             conn.commit()
 
             # Encerrando o cursor e a conexão do postgreSQL via psycopg2
             if conn is not None:
                 cur.close()
                 conn.close()
-                print("PostgreSQL connection is closed")
-
-                print('...')
 
         # Demostrando o erro de SQL ou de conexão.
         except Exception as e:
             print(f"Ocorreu o seguinte erro na verificação/criação da tabela: {e}")
 
+
+
     def write_postgres(self, df):
         '''
         Persistindo o Dataframe do Spark no PostgreSQL por meio do JDBC.
         '''
-        
+
         # JDBC URL configurações
         jdbc_url = f"jdbc:postgresql://{self.host}:{self.port}/{self.database}"
 

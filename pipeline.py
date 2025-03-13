@@ -1,8 +1,8 @@
 # Import Módolos
 import extract.extract_location_nominatim as extract_location_nominatim
 import extract.extract_weather_now as extract_weather_now
+import drivers.driver_postgres as driver_postgres
 import transformation
-import driver_postgres
 
 # Definindo variaveis (APIs e Banco de dados)
 api_key_open_weathermap = "d200182684adb0b606788a22747cffd6"
